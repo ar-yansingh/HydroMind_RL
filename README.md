@@ -98,7 +98,7 @@ To run the **SCADA Digital Twin locally**:
 ## 1️⃣ Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/HydroMind_RL.git
+git clone https://github.com/ar-yansingh/HydroMind_RL.git
 cd HydroMind_RL
 ```
 
@@ -149,5 +149,20 @@ Construct the mathematical **state graph dynamically on the frontend** to pass t
 
 ### 🔹 IoT Edge Containerization
 Deploy the trained model via **Docker containers** to edge devices such as **Raspberry Pi** for localized PLC control.
+
+---
+
+# 🤝 Contributing
+
+Yes — **any change made to this repository is reflected in GitHub!**
+
+This project is managed via [GitHub](https://github.com/ar-yansingh/HydroMind_RL). All commits, pull requests, and code reviews happen there in real time. The standard contribution workflow is:
+
+1. Fork the repository or create a new branch.
+2. Make your changes locally (or via GitHub's Codespaces / Copilot agent).
+3. Open a **Pull Request** — your changes will immediately appear in the repo for review.
+4. Once merged, the changes are live on the `main` branch for everyone to see.
+
+Feel free to open issues or PRs to improve the agent, the SCADA dashboard, or the documentation!
 
 ---
