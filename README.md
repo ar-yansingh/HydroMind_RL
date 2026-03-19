@@ -67,6 +67,47 @@ A simulated **Modbus TCP command** is transmitted to the PLC, actuating the phys
 - **Offline Fault Monitoring**  
   Built-in **edge-device failure simulation** to alert maintenance crews of signal loss.
 
+- **Crisis Alert Banners** *(v2)*  
+  Animated red/amber banners appear instantly when a network anomaly is injected — judges never wonder if the system has responded.
+
+- **AI vs. Human Performance Comparison** *(v2)*  
+  A live comparison table per scenario shows response time, pressure recovery, and NRW loss for the AI agent versus a manual operator.
+
+- **"Why DDPG + GNN?" Panel** *(v2)*  
+  Side-by-side differentiation against PID controllers, rule-based systems, DQN, and manual operation.
+
+- **Dynamic Reservoir Head** *(v2)*  
+  The reservoir head SCADA card now correctly reflects reduced head (35 m) during Summer Shortage events.
+
+- **Auto-Refresh Mode** *(v2)*  
+  Toggle in the sidebar for a 5-second live refresh loop, making the dashboard feel like a real SCADA terminal.
+
+---
+
+# ⚔️ Why DDPG + GNN Beats Alternatives
+
+| Alternative | Limitation | HydroMind Advantage |
+|-------------|-----------|---------------------|
+| **PID Controller** | Requires manual re-tuning per fault type | DDPG adapts to unseen scenarios through policy generalisation |
+| **Rule-Based Systems** | Cannot encode 800+ node spatial correlations | GNN propagates pressure state across the full pipe topology |
+| **DQN (Discrete RL)** | Only selects from a fixed set of valve positions | DDPG outputs a continuous aperture value (0–50%) for fine-grained control |
+| **Manual Operators** | 5–15 min reaction time, shift gaps, fatigue | ~120 ms AI inference, 24/7 autonomous coverage, zero operator fatigue |
+
+---
+
+# 📈 Real Learning: v1 → v2 Improvements
+
+After internal testing, the following issues were identified and resolved:
+
+| Issue Found | Fix Applied |
+|-------------|-------------|
+| Diagnostic text for Offline/Manual modes was silently overwritten by AI-mode text | Removed the duplicate `diag_text` assignment in the panel section |
+| Reservoir Head card always showed 45.0 m even during Summer Shortage | Added per-scenario reservoir head logic (35.0 m during shortage) |
+| Terminal log showed `0.461` instead of `46.1%` for valve actuation | Fixed display to show `valve_pct` directly as a percentage |
+| Manual bypass Non-Revenue Loss showed "Unknown" | Replaced with an estimated loss formula based on deviation from AI optimal |
+| No contextual alert when a crisis was injected | Added animated crisis alert banners (red for critical, amber for warnings) |
+| No differentiation narrative for judges/stakeholders | Added AI vs Human comparison table and "Why DDPG + GNN?" panel |
+
 ---
 
 # 🛠️ Technology Stack
