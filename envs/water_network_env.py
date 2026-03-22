@@ -38,7 +38,54 @@ class AquaFlowEnv(gym.Env):
 
         self.sim = None
         self.current_step = 0
-        self.current_scenario = "Normal"
+
+        self.active_anomaly_node = None
+        self.current_scenario = "NORMAL"  # Changed from AMBIENT
+
+    # --- PHYSICS HOOKS FOR MAIN.PY TO CALL ---
+
+    def inject_rupture(self, target_id):
+        """Physics: Punch a hole at the target"""
+        self.active_anomaly_node = target_id
+        self.current_scenario = "RUPTURE"
+
+        if target_id in self.wn.link_name_list:
+            # If pipe, leak the start node
+            node_id = self.wn.get_link(target_id).start_node_name
+            self.wn.get_node(node_id).add_leak(
+                self.wn, area=0.05, start_time=self.current_step)
+        else:
+            self.wn.get_node(target_id).add_leak(
+                self.wn, area=0.05, start_time=self.current_step)
+
+    def inject_surge(self, target_id):
+        """Physics: 10x Demand at target"""
+        self.active_anomaly_node = target_id
+        self.current_scenario = "SURGE"
+        if target_id in self.wn.node_name_list:
+            node = self.wn.get_node(target_id)
+            node.demand_timeseries_list[0].base_value *= 10.0
+
+    def inject_shortage(self):
+        """Physics: Reservoir Pressure Drop"""
+        res_name = self.wn.reservoir_name_list[0]
+        self.wn.get_node(res_name).base_head *= 0.6
+        self.active_anomaly_node = res_name
+        self.current_scenario = "SHORTAGE"
+
+    def apply_surgical_isolation(self, target_id):
+        """Physics: Close the specific pipe/valves"""
+        if target_id in self.wn.link_name_list:
+            self.wn.get_link(target_id).status = 'CLOSED'
+        elif target_id in self.wn.node_name_list:
+            for link in self.wn.get_links_for_node(target_id):
+                self.wn.get_link(link).status = 'CLOSED'
+
+    def reset_to_normal(self):
+        """Physics: Reload original network"""
+        self.wn = wntr.network.WaterNetworkModel(self.network_file)
+        self.active_anomaly_node = None
+        self.current_scenario = "NORMAL"
 
     def apply_scenario(self):
         scenarios = ["Normal", "Leakage", "Shortage", "DemandSpike"]
@@ -97,11 +144,39 @@ class AquaFlowEnv(gym.Env):
 
         observation = np.array([pressure_A, pressure_B], dtype=np.float32)
 
+        # --- NEW PHASE 1: ISOLATION & ECONOMIC REWARD ---
         target_pressure = 20.0
-        penalty = abs(target_pressure - pressure_B)
 
-        # STABILITY FIX: Clip the penalty directly so it cannot fail
-        reward = float(np.clip(-penalty, -50.0, 0.0))
+        # 1. Stability Penalty (Keep the town pressurized)
+        stability_penalty = abs(target_pressure - pressure_B)
+
+        # 2. Economic Penalty (The Isolation Logic)
+        try:
+            # WNTR results.node['demand'] gives us the volume leaving Node B
+            # Multiply by 1000 to convert m3/s to Liters/sec
+            raw_flow_lps = results.node['demand'].loc[self.current_step,
+                                                      self.node_b] * 1000
+
+            # We subtract a tiny 'normal' demand (0.05) so it only penalizes the LEAK
+            leak_rate_lps = max(0.0, raw_flow_lps - 0.05)
+        except (KeyError, AttributeError):
+            leak_rate_lps = 0.0
+
+        # 3. The Smart Math
+        # We give the leak a high weight (5.0).
+        # This makes the AI realize that losing 1L of water is as 'painful' as being 5m off-pressure.
+        leakage_penalty = leak_rate_lps * 5.0
+
+        # Final combined reward
+        raw_reward = -(stability_penalty + leakage_penalty)
+        reward = float(np.clip(raw_reward, -100.0, 0.0))
+
+        # 4. Info Update (Crucial for the React Dashboard later!)
+        info = {
+            "scenario": self.current_scenario,
+            "node_b_pressure": pressure_B,
+            "leak_rate_lps": float(leak_rate_lps)
+        }
         terminated = self.current_step >= self.wn.options.time.duration
         truncated = False
 

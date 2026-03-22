@@ -37,6 +37,15 @@ class AquaFlowEnv(gym.Env):
         self.current_step = 0
         self.current_scenario = "Normal"
 
+    def inject_rupture(self, target_id):
+        self.current_scenario = "Leakage"
+
+    def inject_surge(self, target_id):
+        self.current_scenario = "DemandSpike"
+
+    def reset_to_normal(self):
+        self.current_scenario = "Normal"
+
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
         scenarios = ["Normal", "Leakage", "Shortage", "DemandSpike"]
@@ -89,7 +98,18 @@ def train_aquaflow():
     print("Initializing Surrogate Digital Twin Environment...")
     env = AquaFlowEnv()
 
-    num_episodes = 100
+    def trigger_rupture(target_id):
+        global env
+    env.inject_rupture(target_id)
+
+    def trigger_surge(target_id):
+        global env
+    env.inject_surge(target_id)
+
+    def reset_scenarios():
+        global env
+    env.reset_to_normal()
+    num_episodes = 30
     batch_size = 32
     max_action = 50.0
     gamma = 0.99
@@ -103,6 +123,34 @@ def train_aquaflow():
     critic_target = copy.deepcopy(critic)
     actor_optimizer = optim.Adam(actor.parameters(), lr=1e-4)
     critic_optimizer = optim.Adam(critic.parameters(), lr=1e-3)
+    # --- PHASE 1: LOAD & FINE-TUNE FOR ISOLATION ---
+    import os
+    import torch
+
+    actor_path = 'models/checkpoints/actor_final.pth'
+    critic_path = 'models/checkpoints/critic_final.pth'
+
+    if os.path.exists(actor_path):
+        print(
+            f">>> [PHASE 1] Loading pre-trained weights from {actor_path}...")
+        actor.load_state_dict(torch.load(actor_path))
+        critic.load_state_dict(torch.load(critic_path))
+
+        # Sync the target networks so they start with the loaded knowledge
+        actor_target = copy.deepcopy(actor)
+        critic_target = copy.deepcopy(critic)
+
+        # THE FINE-TUNING HACK: Force the optimizers to be 10x slower
+        # This ensures the AI doesn't 'panic' when it sees the new leak penalty
+        for param_group in actor_optimizer.param_groups:
+            param_group['lr'] = 1e-5
+        for param_group in critic_optimizer.param_groups:
+            param_group['lr'] = 1e-4
+        print(
+            ">>> [PHASE 1] Weights loaded. Optimizers tuned for Isolation Strategy.")
+    else:
+        print(
+            ">>> [PHASE 1] No weights found at the checkpoint path. Starting fresh.")
 
     memory = GraphReplayBuffer(max_size=2000)
     reward_history = []
@@ -194,3 +242,32 @@ def train_aquaflow():
 
 if __name__ == "__main__":
     train_aquaflow()
+
+# --- AT THE VERY BOTTOM OF main.py (Left Margin) ---
+
+# 1. Create a global variable for the environment
+env = None
+
+
+def start_training():
+    global env
+    print("Initializing Surrogate Digital Twin Environment...")
+    env = AquaFlowEnv()
+    # ... call your actual training logic here ...
+
+# 2. These functions MUST be at the left margin to be importable
+
+
+def trigger_rupture(target_id):
+    if env:
+        env.inject_rupture(target_id)
+
+
+def trigger_surge(target_id):
+    if env:
+        env.inject_surge(target_id)
+
+
+def reset_scenarios():
+    if env:
+        env.reset_to_normal()
