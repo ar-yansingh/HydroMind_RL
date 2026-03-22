@@ -1,0 +1,78 @@
+name: Deploy HydroMind GNN to Azure
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  REGISTRY_NAME: hydromindacr
+  IMAGE_NAME: hydromind-inference
+  RESOURCE_GROUP: Sayantanu-Ghosh-RG
+  WEB_APP_NAME: hydromind-inference-app
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Checkout repository code
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # Step 2: Log in to Azure
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    # Step 3: Log in to Azure Container Registry (using secrets)
+    - name: Login to ACR with Docker
+      run: |
+        echo "${{ secrets.AZURE_PASSWORD }}" | docker login -u "${{ secrets.AZURE_USERNAME }}" --password-stdin "${{ secrets.AZURE_LOGIN_SERVER }}"
+
+    # Step 4: Build Docker image
+    - name: Build Docker image
+      run: |
+        docker build -t ${{ env.REGISTRY_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+                     -t ${{ env.REGISTRY_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest \
+                     ./inference
+      working-directory: ${{ github.workspace }}
+
+    # Step 5: Push image to ACR
+    - name: Push image to ACR
+      run: |
+        docker push ${{ env.REGISTRY_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+        docker push ${{ env.REGISTRY_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
+
+    # Step 6: Configure Web App with Docker image (using secrets directly)
+    - name: Configure Web App
+      run: |
+        az webapp config container set \
+          --name ${{ env.WEB_APP_NAME }} \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --docker-custom-image-name "${{ env.REGISTRY_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest" \
+          --docker-registry-server-url "https://${{ secrets.AZURE_LOGIN_SERVER }}" \
+          --docker-registry-server-user "${{ secrets.AZURE_USERNAME }}" \
+          --docker-registry-server-password "${{ secrets.AZURE_PASSWORD }}"
+
+    # Step 7: Restart Web App
+    - name: Restart Web App
+      run: |
+        az webapp restart \
+          --name ${{ env.WEB_APP_NAME }} \
+          --resource-group ${{ env.RESOURCE_GROUP }}
+
+    # Step 8: Verify deployment
+    - name: Verify deployment
+      run: |
+        WEB_APP_URL=$(az webapp show --name ${{ env.WEB_APP_NAME }} --resource-group ${{ env.RESOURCE_GROUP }} --query "defaultHostName" -o tsv)
+        echo "Web App URL: https://$WEB_APP_URL"
+        sleep 30
+        curl -f https://$WEB_APP_URL/health || echo "Health check pending..."
+
+    # Step 9: Log out from Azure
+    - name: Azure logout
+      run: az logout
+      if: always()
