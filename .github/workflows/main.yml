@@ -43,6 +43,11 @@ jobs:
 
     - name: Configure Web App
       run: |
+        az webapp config appsettings set \
+          --name ${{ env.WEB_APP_NAME }} \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --settings WEBSITES_PORT=8000 WEBSITES_CONTAINER_START_TIME_LIMIT=1800
+          
         az webapp config container set \
           --name ${{ env.WEB_APP_NAME }} \
           --resource-group ${{ env.RESOURCE_GROUP }} \
@@ -61,8 +66,17 @@ jobs:
       run: |
         WEB_APP_URL=$(az webapp show --name ${{ env.WEB_APP_NAME }} --resource-group ${{ env.RESOURCE_GROUP }} --query "defaultHostName" -o tsv)
         echo "Web App URL: https://$WEB_APP_URL"
-        sleep 30
-        curl -f https://$WEB_APP_URL/health || echo "Health check pending..."
+        echo "Waiting for app to initialize (up to 5 mins)..."
+        for i in {1..20}; do
+          if curl -f "https://$WEB_APP_URL/health"; then
+            echo "Deployment Verified!"
+            exit 0
+          fi
+          echo "Still initializing ($i/20)..."
+          sleep 15
+        done
+        echo "Verification timed out, but check the URL manually."
+        exit 1
 
     - name: Azure logout
       run: az logout

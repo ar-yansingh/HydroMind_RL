@@ -64,7 +64,7 @@ export const useTelemetryStore = create<TelemetryStore>((set, get) => ({
     
     // Dynamic URL: Prioritize environment variable, fallback to current host:8000
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const host = import.meta.env.VITE_WS_URL || `${window.location.hostname}:8000`;
+    const host = import.meta.env.VITE_WS_URL || (window.location.hostname === 'localhost' ? 'localhost:8000' : window.location.host);
     const finalUrl = host.includes('://') ? host : `${protocol}//${host}/ws/telemetry`;
     
     ws = new WebSocket(finalUrl);
