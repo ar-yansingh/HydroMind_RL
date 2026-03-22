@@ -1,5 +1,5 @@
 # --- Stage 1: Build Frontend ---
-FROM node:18-slim AS build-stage
+FROM node:20-slim AS build-stage
 WORKDIR /app/frontend
 
 # Copy dependency files first for caching
@@ -8,8 +8,8 @@ RUN npm install
 
 # Copy source and build
 COPY command-center/ ./
-# Explicitly remove any accidentally copied node_modules from host
-RUN rm -rf node_modules && npm install
+# Explicitly remove any accidentally copied node_modules/dist from host
+RUN rm -rf node_modules dist && npm install
 RUN npm run build
 
 # --- Stage 2: Final Backend Image ---
