@@ -10,13 +10,20 @@ from backend.utils.logger import get_logger
 logger = get_logger("HydroMind.Websocket")
 
 router = APIRouter()
-twin_state = DigitalTwinState()
+_twin_state = None
+
+def get_twin_state():
+    global _twin_state
+    if _twin_state is None:
+        _twin_state = DigitalTwinState()
+    return _twin_state
 
 @router.get("/health")
 async def health_check():
+    state = get_twin_state()
     return {
         "status": "ok",
-        "model_loaded": twin_state.model_loaded
+        "model_loaded": state.model_loaded
     }
 
 @router.websocket("/ws/telemetry")
@@ -36,69 +43,69 @@ async def websocket_endpoint(websocket: WebSocket):
                 if action == "trigger_rupture":
                     import datetime
                     ts = datetime.datetime.now().strftime("%H:%M:%S")
-                    twin_state.phase = "RUPTURE"
-                    twin_state.active_target = target
-                    twin_state.active_targets = targets
-                    twin_state.ai_logs.append(f"[{ts}] [CRITICAL] ⭙ RUPTURE DETECTED AT {targets}")
+                    get_twin_state().phase = "RUPTURE"
+                    get_twin_state().active_target = target
+                    get_twin_state().active_targets = targets
+                    get_twin_state().ai_logs.append(f"[{ts}] [CRITICAL] ⭙ RUPTURE DETECTED AT {targets}")
                     for t in targets:
                         if t:
                             trigger_rupture(t)
                     logger.warning(f"Crisis: RUPTURE at {targets}")
 
                 elif action == "trigger_surge":
-                    twin_state.phase = "SURGE"
-                    twin_state.active_target = target
-                    twin_state.active_targets = targets
+                    get_twin_state().phase = "SURGE"
+                    get_twin_state().active_target = target
+                    get_twin_state().active_targets = targets
                     for t in targets:
                         if t:
                             trigger_surge(t)
                     logger.warning(f"Crisis: DEMAND SURGE at {targets}")
 
                 elif action == "trigger_shortage":
-                    twin_state.phase = "SHORTAGE"
-                    twin_state.active_target = target
-                    twin_state.active_targets = targets
+                    get_twin_state().phase = "SHORTAGE"
+                    get_twin_state().active_target = target
+                    get_twin_state().active_targets = targets
                     import datetime
                     ts = datetime.datetime.now().strftime("%H:%M:%S")
-                    twin_state.ai_logs.append(f"[{ts}] [CRITICAL] ▼ GLOBAL SUPPLY DROP")
+                    get_twin_state().ai_logs.append(f"[{ts}] [CRITICAL] ▼ GLOBAL SUPPLY DROP")
                     logger.warning("Crisis: GLOBAL SUPPLY DROP")
 
                 elif action == "deploy_ai":
                     import datetime
                     ts = datetime.datetime.now().strftime("%H:%M:%S")
-                    twin_state.phase = "AI_RECOVERY"
-                    twin_state.ai_logs.append(f"[{ts}] [SYSTEM] ⚡ DEPLOYING GNN ISOLATION AGENT")
-                    logger.info(f"Action: AI ISOLATING {twin_state.active_targets}")
+                    get_twin_state().phase = "AI_RECOVERY"
+                    get_twin_state().ai_logs.append(f"[{ts}] [SYSTEM] ⚡ DEPLOYING GNN ISOLATION AGENT")
+                    logger.info(f"Action: AI ISOLATING {get_twin_state().active_targets}")
 
                 elif action == "toggle_link":
                     targets = command.get("target_nodes", [])
                     status = command.get("status")
                     if status == "CLOSED":
                         for t in targets:
-                            twin_state.closed_links.add(t)
+                            get_twin_state().closed_links.add(t)
                         import datetime
                         ts = datetime.datetime.now().strftime("%H:%M:%S")
-                        twin_state.ai_logs.append(f"[{ts}] [MANUAL] 🛑 VALVE {targets} CLOSED")
+                        get_twin_state().ai_logs.append(f"[{ts}] [MANUAL] 🛑 VALVE {targets} CLOSED")
                         logger.info(f"Action: MANUALLY CLOSED {targets}")
                     elif status == "OPEN":
                         for t in targets:
-                            if t in twin_state.closed_links:
-                                twin_state.closed_links.remove(t)
+                            if t in get_twin_state().closed_links:
+                                get_twin_state().closed_links.remove(t)
                         import datetime
                         ts = datetime.datetime.now().strftime("%H:%M:%S")
-                        twin_state.ai_logs.append(f"[{ts}] [MANUAL] 🟢 VALVE {targets} OPENED")
+                        get_twin_state().ai_logs.append(f"[{ts}] [MANUAL] 🟢 VALVE {targets} OPENED")
                         logger.info(f"Action: MANUALLY OPENED {targets}")
 
                 elif action == "reset_ambient":
                     import datetime
                     ts = datetime.datetime.now().strftime("%H:%M:%S")
-                    twin_state.phase = "AMBIENT"
-                    twin_state.total_loss = 0.0
-                    twin_state.active_target = None
-                    twin_state.active_targets = []
-                    twin_state.closed_links = set()
-                    twin_state.ai_logs.append(f"[{ts}] [SYSTEM] ↺ GRID RESET TO AMBIENT")
-                    twin_state.ai_alert = None
+                    get_twin_state().phase = "AMBIENT"
+                    get_twin_state().total_loss = 0.0
+                    get_twin_state().active_target = None
+                    get_twin_state().active_targets = []
+                    get_twin_state().closed_links = set()
+                    get_twin_state().ai_logs.append(f"[{ts}] [SYSTEM] ↺ GRID RESET TO AMBIENT")
+                    get_twin_state().ai_alert = None
                     reset_scenarios()
                     logger.info("System Reset: AMBIENT")
 
@@ -106,47 +113,47 @@ async def websocket_endpoint(websocket: WebSocket):
 
         async def broadcast_telemetry():
             nonlocal frame_count
-            if not hasattr(twin_state, 'ai_saved'):
-                twin_state.ai_saved = 0.0
+            if not hasattr(get_twin_state(), 'ai_saved'):
+                get_twin_state().ai_saved = 0.0
                 
             while True:
-                twin_state.advance_physics()
+                get_twin_state().advance_physics()
                 frame_count += 1
-                current_leak = 45.5 if twin_state.phase == "RUPTURE" else 0.0
+                current_leak = 45.5 if get_twin_state().phase == "RUPTURE" else 0.0
 
-                if twin_state.phase == "RUPTURE":
-                    twin_state.total_loss += (current_leak * 0.12) / 10.0
-                elif twin_state.phase == "AI_RECOVERY":
-                    twin_state.ai_saved += (45.5 * 0.12) / 10.0
+                if get_twin_state().phase == "RUPTURE":
+                    get_twin_state().total_loss += (current_leak * 0.12) / 10.0
+                elif get_twin_state().phase == "AI_RECOVERY":
+                    get_twin_state().ai_saved += (45.5 * 0.12) / 10.0
 
                 payload = {
-                    "step": twin_state.step,
-                    "phase": twin_state.phase,
-                    "pressure_m": round(twin_state.pressure_m, 2),
-                    "valve_pct": twin_state.valve_pct if twin_state.phase in ["AI_RECOVERY", "RUPTURE"] else 100.0,
+                    "step": get_twin_state().step,
+                    "phase": get_twin_state().phase,
+                    "pressure_m": round(get_twin_state().pressure_m, 2),
+                    "valve_pct": get_twin_state().valve_pct if get_twin_state().phase in ["AI_RECOVERY", "RUPTURE"] else 100.0,
                     "leak_rate_lps": current_leak,
-                    "economic_bleed": round(twin_state.total_loss, 2),
-                    "status": twin_state.status_msg,
-                    "anomaly_node": getattr(twin_state, 'active_target', None),
-                    "anomaly_targets": getattr(twin_state, 'active_targets', []),
-                    "scenario": twin_state.phase,
-                    "closed_links": list(twin_state.closed_links),
-                    "ai_logs": twin_state.ai_logs,
-                    "ai_alert": twin_state.ai_alert,
-                    "ai_saved": round(twin_state.ai_saved, 2)
+                    "economic_bleed": round(get_twin_state().total_loss, 2),
+                    "status": get_twin_state().status_msg,
+                    "anomaly_node": getattr(get_twin_state(), 'active_target', None),
+                    "anomaly_targets": getattr(get_twin_state(), 'active_targets', []),
+                    "scenario": get_twin_state().phase,
+                    "closed_links": list(get_twin_state().closed_links),
+                    "ai_logs": get_twin_state().ai_logs,
+                    "ai_alert": get_twin_state().ai_alert,
+                    "ai_saved": round(get_twin_state().ai_saved, 2)
                 }
                 
                 # Persist telemetry payload every tick asynchronously using TSDB
                 insert_telemetry_tick(payload)
 
                 if frame_count % 5 == 0:
-                    anomaly_targets = getattr(twin_state, 'active_targets', []) or []
-                    rch, dwn = _get_network_reachability(twin_state.closed_links, anomaly_targets, twin_state.phase)
+                    anomaly_targets = getattr(get_twin_state(), 'active_targets', []) or []
+                    rch, dwn = _get_network_reachability(get_twin_state().closed_links, anomaly_targets, get_twin_state().phase)
                     payload["node_states"] = _generate_node_states(
-                        twin_state.phase, twin_state.step, rch, dwn, anomaly_targets
+                        get_twin_state().phase, get_twin_state().step, rch, dwn, anomaly_targets
                     )
                     payload["link_states"] = _generate_link_states(
-                        twin_state.phase, twin_state.step, twin_state.closed_links, rch, dwn, anomaly_targets
+                        get_twin_state().phase, get_twin_state().step, get_twin_state().closed_links, rch, dwn, anomaly_targets
                     )
 
                 await websocket.send_text(json.dumps(payload))

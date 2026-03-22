@@ -66,13 +66,13 @@ jobs:
       run: |
         WEB_APP_URL=$(az webapp show --name ${{ env.WEB_APP_NAME }} --resource-group ${{ env.RESOURCE_GROUP }} --query "defaultHostName" -o tsv)
         echo "Web App URL: https://$WEB_APP_URL"
-        echo "Waiting for app to initialize (up to 5 mins)..."
-        for i in {1..20}; do
+        echo "Waiting for app to initialize (up to 10 mins)..."
+        for i in {1..40}; do
           if curl -f "https://$WEB_APP_URL/health"; then
             echo "Deployment Verified!"
             exit 0
           fi
-          echo "Still initializing ($i/20)..."
+          echo "Still initializing ($i/40)..."
           sleep 15
         done
         echo "Verification timed out, but check the URL manually."
