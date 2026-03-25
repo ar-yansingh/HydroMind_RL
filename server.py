@@ -18,6 +18,21 @@ app.add_middleware(
 
 app.include_router(websocket_router)
 
+import threading
+import time
+from backend.api.websocket import get_twin_state
+
+@app.on_event("startup")
+def startup_event():
+    print(">>> Triggering background initialization of Digital Twin...")
+    def init_background():
+        # Give Uvicorn a moment to bind the port and start accepting traffic
+        time.sleep(2)
+        get_twin_state()
+    
+    # Run heavy WNTR and PyTorch initialization in a background daemon thread
+    threading.Thread(target=init_background, daemon=True).start()
+
 # Mount the React frontend 'dist' folder to the root
 if os.path.exists("dist"):
     app.mount("/", StaticFiles(directory="dist", html=True), name="frontend")

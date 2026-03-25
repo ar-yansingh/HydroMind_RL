@@ -100,15 +100,15 @@ def train_aquaflow():
 
     def trigger_rupture(target_id):
         global env
-    env.inject_rupture(target_id)
+        env.inject_rupture(target_id)
 
     def trigger_surge(target_id):
         global env
-    env.inject_surge(target_id)
+        env.inject_surge(target_id)
 
     def reset_scenarios():
         global env
-    env.reset_to_normal()
+        env.reset_to_normal()
     num_episodes = 30
     batch_size = 32
     max_action = 50.0
@@ -266,6 +266,11 @@ def trigger_rupture(target_id):
 def trigger_surge(target_id):
     if env:
         env.inject_surge(target_id)
+
+
+def trigger_shortage():
+    if env:
+        env.inject_shortage()
 
 
 def reset_scenarios():

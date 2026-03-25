@@ -23,10 +23,12 @@ def get_twin_state():
 
 @router.get("/health")
 async def health_check():
-    state = get_twin_state()
+    # Return immediately! Do not block the event loop with synchronous 'get_twin_state()'
+    global _twin_state
+    is_ready = _twin_state is not None and getattr(_twin_state, 'model_loaded', False)
     return {
         "status": "ok",
-        "model_loaded": state.model_loaded
+        "model_loaded": is_ready
     }
 
 @router.websocket("/ws/telemetry")
