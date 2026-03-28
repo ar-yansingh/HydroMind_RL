@@ -1,0 +1,24 @@
+# Project-level ignores
+venv/
+__pycache__/
+*.pth
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+.git/
+.github/
+.vscode/
+
+# Frontend-level ignores (relative to root)
+command-center/node_modules/
+command-center/dist/
+command-center/.vite/
+command-center/.env
+command-center/.env.local
+command-center/.env.development.local
+command-center/.env.test.local
+command-center/.env.production.local
+command-center/npm-debug.log*
+command-center/yarn-debug.log*
+command-center/yarn-error.log*
