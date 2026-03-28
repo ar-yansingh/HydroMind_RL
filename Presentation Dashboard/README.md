@@ -1,139 +1,179 @@
-<![CDATA[# 🔍 HydroMind — Presentation Dashboard
+<![CDATA[<div align="center">
 
-> **An investigative-style web experience that presents India's ₹20,000 Crore water crisis and the AI-powered HydroMind solution.**
+# 🔍 HydroMind — The Invisible Crisis
 
-This dashboard serves as an interactive storytelling platform designed for presentations, investor demos, and public awareness. It uses a **detective investigation board** visual theme — complete with cork boards, newspaper clippings, polaroid photos, push pins, and red strings — to walk viewers through the problem, the evidence, and the solution.
+### An Interactive Investigation into India's ₹20,000 Crore Water Infrastructure Failure
 
----
+<br/>
 
-## 🖥️ Live Demo
+[![Next.js](https://img.shields.io/badge/Next.js_16-000000?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React_19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Tailwind](https://img.shields.io/badge/Tailwind_CSS_4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![Framer Motion](https://img.shields.io/badge/Framer_Motion-0055FF?style=for-the-badge&logo=framer&logoColor=white)](https://www.framer.com/motion/)
 
-🔗 **Live System:** [hydromind-inference-app.azurewebsites.net](https://hydromind-inference-app.azurewebsites.net/)
+<br/>
 
----
+> *"Nearly half of all treated water in Indian urban networks vanishes before it ever reaches a single household."*
 
-## 📸 Sections Overview
+<br/>
 
-| Section | Description |
-|---|---|
-| **🔎 Investigation (Hero)** | Newspaper-headline style intro — "THE INVISIBLE CRISIS" — with floating evidence cards showing key stats (50% water lost, ₹20,000 Cr loss, 126B L/day global waste, 600M+ Indians at risk) |
-| **📋 Exhibit A: The Scale of the Crisis** | Animated counters, sourced statistics, and case files from Bengaluru, Delhi, and Chennai water crises |
-| **⚠️ Exhibit B: The Operator's Nightmare** | Field-report styled cards revealing why water operators fail — blind infrastructure, 6+ hour leak detection, guesswork pressure management |
-| **📷 Exhibit C: The Consumer's Blind Spot** | Polaroid-style snapshots showing consumer impact — zero visibility, no warnings, hospitals at risk, women bearing the water burden |
-| **✅ Solution Dossier: The HydroMind Answer** | Before → After comparison showing HydroMind's AI-powered transformation for both operators (command center) and consumers (real-time dashboard) |
-| **📰 Evidence Clippings** | Auto-scrolling news article slider with real water crisis headlines |
-| **📌 Footer** | Project links and credits |
+[🔗 View Live System](https://hydromind-inference-app.azurewebsites.net/) · [📋 HydroMind Dashboard →](../HydroMind%20Dashboard/)
+
+</div>
 
 ---
 
-## 🛠️ Tech Stack
+<br/>
 
-| Layer | Technologies |
-|---|---|
-| **Framework** | [Next.js 16](https://nextjs.org/) (Turbopack) |
-| **Language** | [TypeScript](https://www.typescriptlang.org/) |
-| **UI Library** | [React 19](https://react.dev/) |
-| **Styling** | [Tailwind CSS 4](https://tailwindcss.com/) |
-| **Animations** | [Framer Motion](https://www.framer.com/motion/) |
-| **Components** | [Radix UI](https://www.radix-ui.com/) + [shadcn/ui](https://ui.shadcn.com/) |
-| **Icons** | [Lucide React](https://lucide.dev/) |
-| **Charts** | [Recharts](https://recharts.org/) |
-| **Analytics** | [Vercel Analytics](https://vercel.com/analytics) |
+## 💡 What is this?
+
+This is a **presentation-grade storytelling dashboard** that walks viewers through the catastrophic failures of India's water infrastructure — and how HydroMind's AI-powered platform solves them.
+
+Built as an **interactive investigation board** with a detective/newspaper aesthetic, this dashboard is designed for:
+
+- 🎤 **Investor pitches & demo days**
+- 🏛️ **Government stakeholder presentations**
+- 📢 **Public awareness campaigns**
+- 🎓 **Academic project showcases**
+
+<br/>
 
 ---
 
-## 🚀 Getting Started
+<br/>
 
-### Prerequisites
+## 🕵️ The Investigation — Section by Section
 
-- [Node.js](https://nodejs.org/) v18 or later
-- npm or pnpm
+<br/>
 
-### Installation
+<table>
+<tr>
+<td width="80" align="center">🔴</td>
+<td>
+<h3>EXHIBIT A — The Scale of the Crisis</h3>
+<p>Animated counters reveal the damage: <b>50% water lost</b> in transit, <b>₹20,000 Crore</b> annual economic loss, <b>126 Billion liters/day</b> wasted globally, and <b>600M+ Indians</b> under water stress. Backed by sources from the Central Water Commission, World Bank, and NITI Aayog.</p>
+<p><i>Includes case files from Bengaluru, Delhi, and Chennai water crises.</i></p>
+</td>
+</tr>
+<tr>
+<td width="80" align="center">⚠️</td>
+<td>
+<h3>EXHIBIT B — The Operator's Nightmare</h3>
+<p>Field-report styled evidence cards revealing why water operators are set up to fail: <b>zero real-time sensors</b>, <b>6+ hour leak detection</b>, phone-based coordination, no priority routing for hospitals, and guesswork pressure management across 1000+ km of unmapped pipes.</p>
+</td>
+</tr>
+<tr>
+<td width="80" align="center">📷</td>
+<td>
+<h3>EXHIBIT C — The Consumer's Blind Spot</h3>
+<p>Polaroid-style snapshots showing the consumer's reality: <b>zero visibility</b> into water quality, <b>no early warnings</b> for supply cuts, contamination blind spots, billing disputes, hospitals losing supply, and <b>women walking 5–20 km daily</b> for water.</p>
+</td>
+</tr>
+<tr>
+<td width="80" align="center">✅</td>
+<td>
+<h3>SOLUTION DOSSIER — The HydroMind Answer</h3>
+<p>Before → After transformation cards showing how HydroMind upgrades both <b>operator capabilities</b> (785-node live network, instant AI anomaly detection, one-click crisis response) and <b>consumer awareness</b> (real-time pressure gauges, usage tracking, proactive alerts).</p>
+</td>
+</tr>
+<tr>
+<td width="80" align="center">📰</td>
+<td>
+<h3>Evidence Clippings — News Articles</h3>
+<p>Auto-scrolling news slider featuring real headlines about India's water crisis from major publications, reinforcing the urgency of the problem.</p>
+</td>
+</tr>
+</table>
+
+<br/>
+
+---
+
+<br/>
+
+## 🎨 Design Language
+
+This dashboard uses a unique **"Detective Investigation Board"** visual identity:
+
+| Element | Implementation |
+|:---|:---|
+| 🪧 Cork Board | Warm, textured backgrounds with paper grain overlays |
+| 📰 Newspaper Clippings | Torn-edge headlines with serif typography and stat callouts |
+| 📌 Push Pins & Red Strings | SVG overlays connecting evidence points like a crime board |
+| 📷 Polaroids | Grayscale photography with handwritten captions |
+| 🔴 Classified Stamps | "EXHIBIT A", "ACTIVE INVESTIGATION" badges |
+| 🖊️ Handwritten Notes | Investigator-style annotations and field reports |
+| ✨ Scroll Animations | Framer Motion reveals, animated counters, and micro-interactions |
+
+<br/>
+
+---
+
+<br/>
+
+## 🚀 Quick Start
 
 ```bash
-# Navigate to the Presentation Dashboard directory
+# Navigate into this directory
 cd "Presentation Dashboard"
 
 # Install dependencies
 npm install
 
-# Start the dev server
+# Start development server (Turbopack)
 npm run dev
 ```
 
-The app will be available at **http://localhost:3000**.
+Open **http://localhost:3000** and scroll through the investigation.
 
-### Build for Production
-
-```bash
-npm run build
-npm run start
-```
+<br/>
 
 ---
 
-## 📁 Project Structure
+<br/>
+
+## 📁 Structure
 
 ```
-Presentation Dashboard/
 ├── app/
-│   ├── globals.css         # Global styles, custom theme (cork board, newspaper, etc.)
-│   ├── layout.tsx          # Root layout with metadata & SEO
-│   └── page.tsx            # Main page composing all sections
+│   ├── globals.css              # Investigation board theme & custom styles
+│   ├── layout.tsx               # Root layout with SEO metadata
+│   └── page.tsx                 # Main page — assembles all investigation sections
+│
 ├── components/
-│   ├── hero-section.tsx          # Investigation board hero with animated stats
-│   ├── problem-section.tsx       # Crisis stats, city cases, operator & consumer pain points
-│   ├── impact-section.tsx        # HydroMind solution showcase (before → after)
-│   ├── tech-stack-section.tsx    # Interactive tech stack grid with detail modals
-│   ├── news-slider-articles.tsx  # Auto-scrolling news clippings
-│   ├── navigation.tsx            # File-tab styled navigation bar
-│   ├── footer-section.tsx        # Footer with links
-│   ├── water-ripple-effect.tsx   # Canvas-based water ripple animation
-│   ├── tilt-card.tsx             # Interactive 3D tilt card component
-│   ├── node-connector.tsx        # SVG node connection visualizer
-│   ├── enhanced-icon.tsx         # Animated icon wrapper
-│   ├── smooth-scroll-provider.tsx
-│   ├── theme-provider.tsx
-│   └── ui/                       # shadcn/ui component primitives
-├── public/                       # Static assets (images, screenshots)
-├── styles/                       # Additional stylesheets
-└── package.json
+│   ├── hero-section.tsx         # Cork board hero with floating evidence cards
+│   ├── problem-section.tsx      # Exhibits A, B, C — crisis stats & pain points
+│   ├── impact-section.tsx       # Solution dossier — before/after transformation
+│   ├── tech-stack-section.tsx   # Interactive tech stack with detail modals
+│   ├── news-slider-articles.tsx # Auto-scrolling news clippings
+│   ├── navigation.tsx           # File-tab styled investigation nav bar
+│   ├── footer-section.tsx       # Footer
+│   ├── water-ripple-effect.tsx  # Canvas water ripple animation
+│   ├── tilt-card.tsx            # 3D tilt card interaction
+│   ├── node-connector.tsx       # SVG network node visualizer
+│   └── ui/                      # shadcn/ui primitives
+│
+└── public/                      # Static images & screenshots
 ```
 
----
-
-## 🎨 Design Philosophy
-
-This dashboard uses a unique **"Detective Investigation Board"** aesthetic:
-
-- 🪧 **Cork Board Backgrounds** — Warm, textured surfaces that feel tactile and investigative
-- 📰 **Newspaper Clippings** — Headlines and statistics styled as torn newspaper articles
-- 📌 **Push Pins & Red Strings** — SVG elements connecting evidence points like a crime board
-- 📷 **Polaroid Photos** — Grayscale images with handwritten captions
-- 🖊️ **Handwritten Annotations** — Notes-style typography for a personal, investigative feel
-- 🔴 **Classified Stamps** — "EXHIBIT A", "ACTIVE INVESTIGATION" badges for dramatic emphasis
-- ✨ **Framer Motion Animations** — Smooth scroll-triggered reveals, animated counters, and micro-interactions
+<br/>
 
 ---
 
-## 📊 Key Data Points Presented
+<br/>
 
-- **50%** of treated water lost in Indian networks (Central Water Commission)
-- **₹20,000 Crore** annual economic loss from Non-Revenue Water (Ministry of Jal Shakti)
-- **126 Billion Liters/day** wasted globally (World Bank)
-- **600M+ Indians** facing water stress (NITI Aayog)
-- Case studies from **Bengaluru**, **Delhi**, and **Chennai**
+<div align="center">
 
----
+### Part of the [HydroMind](https://github.com/ar-yansingh/HydroMind_RL) Project
 
-## 🤝 Related
+**AI-Powered Smart Water Management System**
 
-- **[HydroMind Dashboard](../HydroMind%20Dashboard/)** — The main operational dashboard with real-time network monitoring, AI agent control, simulation mode, and consumer/operator views.
+*Built with Graph Neural Networks · DDPG Reinforcement Learning · Digital Twin Simulation*
 
----
+<br/>
 
-## 📄 License
+[![GitHub](https://img.shields.io/badge/View_on_GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/ar-yansingh/HydroMind_RL)
 
-Part of the **HydroMind** project — AI-Powered Smart Water Management System.
+</div>
 ]]>
