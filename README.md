@@ -2,10 +2,13 @@
 
 ### AI-Powered Smart Water Network Management System
 
+[![Live Demo](https://img.shields.io/badge/🔴_Live_Demo-hydromind--inference--app-00c853.svg)](https://hydromind-inference-app.azurewebsites.net/)
 [![React](https://img.shields.io/badge/React-19-61dafb.svg)](https://reactjs.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.95+-009688.svg)](https://fastapi.tiangolo.com/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-ee4c2c.svg)](https://pytorch.org/)
 [![Azure](https://img.shields.io/badge/Deploy-Azure-blue.svg)](https://azure.microsoft.com/)
+
+> 🔗 **Live Demo**: [hydromind-inference-app.azurewebsites.net](https://hydromind-inference-app.azurewebsites.net/)
 
 **HydroMind_RL** is a real-time AI-driven SCADA Command Center and Digital Twin for urban water distribution networks. It uses a **Graph Neural Network (GNN)** trained via **Deep Deterministic Policy Gradient (DDPG)** reinforcement learning to autonomously detect anomalies — burst pipes, demand surges, supply shortages — and isolate affected zones by actuating smart valves in real time.
 
