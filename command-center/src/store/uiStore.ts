@@ -8,7 +8,7 @@ interface UIStore {
   showHeatmap: boolean;
   showMinimap: boolean;
   mapMode: 'canvas' | 'city';
-  dashboardTab: 'operator' | 'consumer';
+  dashboardTab: 'operator' | 'consumer' | 'simulation';
   consumerNodeId: string;
   theme: 'dark' | 'light';
   
@@ -19,7 +19,7 @@ interface UIStore {
   toggleHeatmap: () => void;
   toggleMinimap: () => void;
   setMapMode: (mode: 'canvas' | 'city') => void;
-  setDashboardTab: (tab: 'operator' | 'consumer') => void;
+  setDashboardTab: (tab: 'operator' | 'consumer' | 'simulation') => void;
   setConsumerNodeId: (id: string) => void;
   toggleTheme: () => void;
   resetUI: () => void;
@@ -54,7 +54,7 @@ export const useUIStore = create<UIStore>((set) => ({
   toggleHeatmap: () => set((state) => ({ showHeatmap: !state.showHeatmap })),
   toggleMinimap: () => set((state) => ({ showMinimap: !state.showMinimap })),
   setMapMode: (mode: 'canvas' | 'city') => set({ mapMode: mode }),
-  setDashboardTab: (tab: 'operator' | 'consumer') => set({ dashboardTab: tab }),
+  setDashboardTab: (tab: 'operator' | 'consumer' | 'simulation') => set({ dashboardTab: tab }),
   setConsumerNodeId: (id: string) => set({ consumerNodeId: id }),
   toggleTheme: () => set((state) => ({ theme: state.theme === 'dark' ? 'light' : 'dark' })),
   resetUI: () => set({

@@ -62,6 +62,12 @@ export interface TelemetryPayload {
   flow_directions?: Record<string, FlowDirection>;
   network_analytics?: NetworkAnalytics;
   diagnostics?: Diagnostic[];
+  // Simulation mode
+  sim_mode?: boolean;
+  active_events?: any[];
+  sim_log?: string[];
+  sim_results?: any;
+  sim_ai_deployed?: boolean;
 }
 
 // --- WebSocket & State Store ---

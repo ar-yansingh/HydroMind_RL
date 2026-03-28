@@ -13,6 +13,7 @@ import PressureDelta from './components/widgets/PressureDelta';
 import NetworkHealth from './components/widgets/NetworkHealth';
 import AgentStatus from './components/widgets/AgentStatus';
 import ConsumerDashboard from './consumer/ConsumerDashboard';
+import SimulationDashboard from './simulation/SimulationDashboard';
 
 function App() {
   const { connect, disconnect, telemetry } = useTelemetryStore();
@@ -66,6 +67,12 @@ function App() {
           >
             👤 Consumer
           </button>
+          <button
+            className={`tab-btn ${dashboardTab === 'simulation' ? 'tab-btn-active' : ''}`}
+            onClick={() => setDashboardTab('simulation')}
+          >
+            🎲 Simulation
+          </button>
         </div>
       </div>
 
@@ -73,6 +80,10 @@ function App() {
       {dashboardTab === 'consumer' ? (
         <div className="flex-1 overflow-y-auto" style={{ background: '#f8fafc' }}>
           <ConsumerDashboard />
+        </div>
+      ) : dashboardTab === 'simulation' ? (
+        <div className="flex-1 overflow-hidden">
+          <SimulationDashboard />
         </div>
       ) : (
         <>

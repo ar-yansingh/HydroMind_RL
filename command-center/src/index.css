@@ -1155,3 +1155,474 @@ body {
 [data-theme="dark"] .consumer-supply-banner div {
   color: #cbd5e1;
 }
+
+
+/* ═══ SIMULATION MODE ═══════════════════════════════════════ */
+
+.sim-dashboard {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--hm-bg);
+  color: var(--hm-text);
+}
+
+.sim-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background: var(--hm-surface);
+  border-bottom: 1px solid var(--hm-border);
+}
+
+.sim-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 280px 1fr 280px;
+  gap: 0;
+  overflow: hidden;
+}
+
+.sim-log-panel {
+  padding: 14px;
+  background: var(--hm-bg);
+  border-right: 1px solid var(--hm-border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sim-log-entries {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sim-log-entries::-webkit-scrollbar { width: 4px; }
+.sim-log-entries::-webkit-scrollbar-thumb { background: var(--hm-surface-2); border-radius: 4px; }
+
+.sim-log-entry {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.4;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: var(--hm-surface);
+  border-left: 3px solid transparent;
+  animation: fadeIn 0.2s var(--ease-out-expo) both;
+}
+
+.sim-log-scenario { border-left-color: #dc2626; }
+.sim-log-ai { border-left-color: #0d9488; }
+.sim-log-result { border-left-color: #059669; background: rgba(5,150,105,0.08); }
+
+.sim-log-text { opacity: 0.85; }
+
+.sim-map-panel {
+  position: relative;
+  overflow: hidden;
+  background: var(--hm-bg);
+}
+
+.sim-map-toggle {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 2px;
+  z-index: 500;
+  background: var(--hm-surface);
+  border-radius: 8px;
+  padding: 2px;
+  border: 1px solid var(--hm-border);
+}
+
+.sim-map-btn {
+  font-size: 10px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  color: var(--hm-text-mute);
+  font-weight: 500;
+}
+.sim-map-btn.active {
+  background: var(--hm-teal);
+  color: #fff;
+}
+
+.sim-info-panel {
+  padding: 14px;
+  background: var(--hm-bg);
+  border-left: 1px solid var(--hm-border);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+
+.sim-card {
+  padding: 14px;
+  background: var(--hm-surface);
+  border-radius: 12px;
+  border: 1px solid var(--hm-border-2);
+}
+
+/* Event badges */
+.sim-event-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.03);
+}
+
+.sim-event-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.sim-event-rupture .sim-event-dot { background: #dc2626; box-shadow: 0 0 6px rgba(220,38,38,0.4); }
+.sim-event-surge .sim-event-dot { background: #f59e0b; box-shadow: 0 0 6px rgba(245,158,11,0.4); }
+.sim-event-shortage .sim-event-dot { background: #ea580c; box-shadow: 0 0 6px rgba(234,88,12,0.4); }
+
+/* Results */
+.sim-results-card {
+  animation: slideUp 0.4s var(--ease-out-expo) both;
+}
+
+.sim-grade {
+  text-align: center;
+  margin-bottom: 14px;
+}
+
+.sim-grade-letter {
+  font-family: var(--font-mono);
+  font-size: 42px;
+  font-weight: 800;
+  display: inline-block;
+}
+
+.grade-Aplus, .grade-A { color: #059669; }
+.grade-B { color: #f59e0b; }
+.grade-C { color: #ea580c; }
+.grade-F { color: #dc2626; }
+
+.sim-results-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.sim-result-item {
+  padding: 8px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.sim-result-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.5;
+  font-weight: 600;
+}
+
+.sim-result-value {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--hm-teal);
+  margin-top: 2px;
+}
+
+/* Buttons */
+.sim-btn {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sim-btn-primary {
+  background: linear-gradient(135deg, #0d9488, #14b8a6);
+  color: #fff;
+  border-color: rgba(13,148,136,0.3);
+}
+.sim-btn-primary:hover { box-shadow: 0 0 20px rgba(13,148,136,0.3); }
+
+.sim-btn-ai {
+  background: linear-gradient(135deg, #6366f1, #818cf8);
+  color: #fff;
+  border-color: rgba(99,102,241,0.3);
+}
+.sim-btn-ai:hover { box-shadow: 0 0 20px rgba(99,102,241,0.3); }
+
+.sim-btn-danger {
+  background: transparent;
+  color: #dc2626;
+  border-color: rgba(220,38,38,0.2);
+}
+.sim-btn-danger:hover { background: rgba(220,38,38,0.1); }
+
+/* ── Simulation Light Theme ── */
+[data-theme="light"] .sim-dashboard {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+
+[data-theme="light"] .sim-header {
+  background: #fff;
+  border-color: #e2e8f0;
+}
+
+[data-theme="light"] .sim-log-panel {
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+}
+
+[data-theme="light"] .sim-log-entry {
+  background: #fff;
+}
+
+[data-theme="light"] .sim-info-panel {
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+}
+
+[data-theme="light"] .sim-card {
+  background: #fff;
+  border-color: #e2e8f0;
+}
+
+[data-theme="light"] .sim-event-badge {
+  background: rgba(0,0,0,0.03);
+}
+
+[data-theme="light"] .sim-result-item {
+  background: rgba(0,0,0,0.03);
+}
+
+[data-theme="light"] .sim-map-toggle {
+  background: #fff;
+  border-color: #e2e8f0;
+}
+
+[data-theme="light"] .sim-map-btn {
+  color: #64748b;
+}
+
+[data-theme="light"] .sim-btn-danger {
+  color: #dc2626;
+  border-color: rgba(220,38,38,0.15);
+}
+
+/* ── Simulation: Floating Map Banners ── */
+
+.sim-crisis-banner,
+.sim-recovery-banner,
+.sim-stable-banner {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  border-radius: 12px;
+  z-index: 600;
+  animation: slideUp 0.3s var(--ease-out-expo) both;
+  backdrop-filter: blur(12px);
+  max-width: 90%;
+}
+
+.sim-crisis-banner {
+  background: rgba(220,38,38,0.15);
+  border: 1px solid rgba(220,38,38,0.3);
+  color: #fca5a5;
+}
+
+.sim-recovery-banner {
+  background: rgba(13,148,136,0.15);
+  border: 1px solid rgba(13,148,136,0.3);
+  color: #99f6e4;
+}
+
+.sim-stable-banner {
+  background: rgba(5,150,105,0.15);
+  border: 1px solid rgba(5,150,105,0.3);
+  color: #6ee7b7;
+}
+
+.sim-crisis-icon,
+.sim-recovery-icon,
+.sim-stable-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.sim-crisis-icon { animation: pulse-glow-red 1.5s ease-in-out infinite; }
+.sim-recovery-icon { animation: pulse-glow-teal 1.5s ease-in-out infinite; }
+
+@keyframes pulse-glow-red {
+  0%, 100% { opacity: 1; text-shadow: 0 0 8px rgba(220,38,38,0.4); }
+  50% { opacity: 0.6; text-shadow: 0 0 20px rgba(220,38,38,0.8); }
+}
+
+@keyframes pulse-glow-teal {
+  0%, 100% { opacity: 1; text-shadow: 0 0 8px rgba(13,148,136,0.4); }
+  50% { opacity: 0.6; text-shadow: 0 0 20px rgba(13,148,136,0.8); }
+}
+
+/* ── Pulsing Deploy AI button ── */
+.sim-btn-pulse {
+  animation: btn-pulse 2s ease-in-out infinite;
+}
+
+@keyframes btn-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(99,102,241,0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(99,102,241,0); }
+}
+
+/* ── Action log: action entries ── */
+.sim-log-action { border-left-color: #6366f1; background: rgba(99,102,241,0.06); }
+.sim-log-sep { 
+  border-left-color: transparent; 
+  opacity: 0.3; 
+  font-size: 8px;
+  padding: 2px 8px;
+  background: transparent;
+}
+
+/* ── Light theme banner overrides ── */
+[data-theme="light"] .sim-crisis-banner {
+  background: rgba(220,38,38,0.08);
+  color: #991b1b;
+}
+
+[data-theme="light"] .sim-recovery-banner {
+  background: rgba(13,148,136,0.08);
+  color: #115e59;
+}
+
+[data-theme="light"] .sim-stable-banner {
+  background: rgba(5,150,105,0.08);
+  color: #065f46;
+}
+
+[data-theme="light"] .sim-log-action {
+  background: rgba(99,102,241,0.04);
+}
+
+/* ── AI Deploy Confirmation Modal ── */
+.sim-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.sim-modal {
+  background: var(--bg-secondary, #1e293b);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  width: 460px;
+  max-width: 90vw;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+  animation: slideUp 0.3s var(--ease-out-expo) both;
+}
+
+.sim-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.sim-modal-header h2 {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.sim-modal-body {
+  padding: 16px 20px;
+}
+
+.sim-modal-section {
+  margin-bottom: 14px;
+}
+
+.sim-modal-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin-bottom: 8px;
+}
+
+.sim-modal-action {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+}
+
+.sim-modal-bullet {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.sim-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 20px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+/* ── Grade Analysis Card ── */
+.sim-analysis-card {
+  border-left: 3px solid rgba(99,102,241,0.4);
+}
+
+/* ── Light Theme Modal ── */
+[data-theme="light"] .sim-modal {
+  background: #ffffff;
+  border-color: rgba(0,0,0,0.1);
+  box-shadow: 0 25px 60px rgba(0,0,0,0.15);
+}
+
+[data-theme="light"] .sim-modal-header {
+  border-color: rgba(0,0,0,0.06);
+}
+
+[data-theme="light"] .sim-modal-footer {
+  border-color: rgba(0,0,0,0.06);
+}
+
+[data-theme="light"] .sim-analysis-card {
+  border-left-color: rgba(99,102,241,0.3);
+}

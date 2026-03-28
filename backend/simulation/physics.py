@@ -130,22 +130,67 @@ def _generate_node_states(phase, step, reachable, downstream, anomaly_targets=No
         node_status = "NORMAL"
 
         if phase == "RUPTURE" and anomaly_nodes:
-            if nid in anomaly_nodes:
-                pressure = max(1.0, pressure - 18.0)
-                node_status = "RUPTURE_EPICENTER"
-            elif nid in downstream:
-                if nid in alternate_supply:
-                    # Node is downstream but can still get water via a loop
-                    pressure *= 0.55
-                    node_status = "ALTERNATE_SUPPLY"
-                else:
-                    pressure *= 0.25
-                    node_status = "DOWNSTREAM_AFFECTED"
+            # ── SIM_COMPOUND: apply all effects simultaneously ──
+            if original_scenario == "SIM_COMPOUND":
+                # Separate rupture and surge targets
+                _rupt_nodes = set()
+                _surge_nodes = set()
+                # We use a heuristic: pipe-targeted nodes are rupture, node-targeted are surge
+                for tid in (anomaly_targets or []):
+                    resolved = _resolve_targets_to_nodes([tid])
+                    if tid.startswith('p'):  # pipe = rupture
+                        _rupt_nodes.update(resolved)
+                    elif tid.startswith('n'):  # node = surge
+                        _surge_nodes.update(resolved)
+
+                # Apply rupture effects
+                if nid in _rupt_nodes:
+                    pressure = max(1.0, pressure - 18.0)
+                    node_status = "RUPTURE_EPICENTER"
+                elif nid in downstream and nid not in _surge_nodes:
+                    if nid in alternate_supply:
+                        pressure *= 0.55
+                        node_status = "ALTERNATE_SUPPLY"
+                    else:
+                        pressure *= 0.25
+                        node_status = "DOWNSTREAM_AFFECTED"
+
+                # Apply surge effects (overrides if also surge target)
+                if nid in _surge_nodes:
+                    pressure -= 12.0
+                    demand_mult = 4.0
+                    node_status = "SURGE_EPICENTER"
+                elif nid not in _rupt_nodes and nid not in downstream:
+                    min_dist_surge = float('inf')
+                    for sid in _surge_nodes:
+                        sn = _node_lookup.get(sid)
+                        if sn:
+                            d = math.sqrt((node["x"] - sn["x"])**2 + (node["y"] - sn["y"])**2)
+                            if d < min_dist_surge:
+                                min_dist_surge = d
+                    if min_dist_surge < 300:
+                        intensity = max(0.0, 1.0 - (min_dist_surge / 300.0))
+                        pressure -= 12.0 * intensity
+                        demand_mult = 1.0 + 3.0 * intensity
+                        if node_status == "NORMAL":
+                            node_status = "SURGE_CONE"
             else:
-                min_dist = _min_dist_to_targets(node, anomaly_nodes)
-                if min_dist < 200:
-                    pressure -= max(0.0, 8.0 - min_dist * 0.04)
-                    node_status = "PROXIMITY_AFFECTED"
+                # Standard single rupture
+                if nid in anomaly_nodes:
+                    pressure = max(1.0, pressure - 18.0)
+                    node_status = "RUPTURE_EPICENTER"
+                elif nid in downstream:
+                    if nid in alternate_supply:
+                        pressure *= 0.55
+                        node_status = "ALTERNATE_SUPPLY"
+                    else:
+                        pressure *= 0.25
+                        node_status = "DOWNSTREAM_AFFECTED"
+                else:
+                    min_dist = _min_dist_to_targets(node, anomaly_nodes)
+                    if min_dist < 200:
+                        pressure -= max(0.0, 8.0 - min_dist * 0.04)
+                        node_status = "PROXIMITY_AFFECTED"
 
         elif phase == "SURGE" and anomaly_nodes:
             if nid in anomaly_nodes:
@@ -161,10 +206,8 @@ def _generate_node_states(phase, step, reachable, downstream, anomaly_targets=No
                     node_status = "SURGE_CONE"
 
         elif phase == "SHORTAGE":
-            # Elevation vulnerability: higher nodes lose more pressure
             elev_factor = max(0.3, 1.0 - (elev - 27.0) * 0.012)
             pressure *= 0.55 * elev_factor
-            # Leaf nodes are most vulnerable
             if node.get("is_leaf", False):
                 pressure *= 0.5
                 node_status = "CRITICAL_VULNERABLE"
@@ -174,7 +217,37 @@ def _generate_node_states(phase, step, reachable, downstream, anomaly_targets=No
                 node_status = "SUPPLY_REDUCED"
 
         elif phase == "AI_RECOVERY":
-            if original_scenario == "RUPTURE" and anomaly_nodes:
+            if original_scenario == "SIM_COMPOUND" and anomaly_nodes:
+                # Compound AI recovery: isolate ruptures + boost surges + stabilize rest
+                _rupt_nodes = set()
+                _surge_nodes = set()
+                for tid in (anomaly_targets or []):
+                    resolved = _resolve_targets_to_nodes([tid])
+                    if tid.startswith('p'):
+                        _rupt_nodes.update(resolved)
+                    elif tid.startswith('n'):
+                        _surge_nodes.update(resolved)
+
+                if nid in _rupt_nodes:
+                    pressure = 0.0
+                    node_status = "RUPTURE_EPICENTER"
+                elif nid in _surge_nodes:
+                    pressure += 5.0 + 1.5 * math.sin(step * 0.15)
+                    node_status = "AI_BOOSTING"
+                elif nid in downstream:
+                    if nid in alternate_supply:
+                        pressure *= 0.65
+                        pressure += 1.0 * math.sin(step * 0.15)
+                        node_status = "AI_REROUTING"
+                    else:
+                        pressure = 0.0
+                        node_status = "DOWNSTREAM_AFFECTED"
+                else:
+                    pressure *= 0.95
+                    pressure += 1.5 * math.sin(step * 0.15)
+                    node_status = "AI_STABILIZED"
+
+            elif original_scenario == "RUPTURE" and anomaly_nodes:
                 if nid in anomaly_nodes:
                     # AI completely isolates ruptures -> zero pressure
                     pressure = 0.0

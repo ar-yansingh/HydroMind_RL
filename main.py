@@ -46,7 +46,10 @@ class AquaFlowEnv(gym.Env):
     def reset_to_normal(self):
         self.current_scenario = "Normal"
 
-    def reset(self, seed=None, options=None):
+    def inject_shortage(self):
+        self.current_scenario = "Shortage"
+
+    def reset(self, seed=None, options=None, apply_anomaly=True):
         super().reset(seed=seed)
         scenarios = ["Normal", "Leakage", "Shortage", "DemandSpike"]
         self.current_scenario = random.choice(scenarios)

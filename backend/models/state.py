@@ -27,6 +27,14 @@ class DigitalTwinState:
         self.model_loaded = False
         self.leak_rate_lps = 0.0
 
+        # ── Simulation mode (compound multi-scenario) ──
+        self.sim_mode = False
+        self.active_events = []      # List of {type, target, severity/multiplier}
+        self.sim_log = []            # Step-by-step AI action log
+        self.sim_results = None      # Final results dict (set on stabilize)
+        self.sim_start_step = 0      # Step when sim was started
+        self.sim_ai_deployed = False # Whether AI has been auto-deployed
+
         logger.info("Booting AquaFlow Physics Engine...")
         self.env = AquaFlowEnv()
         self.state = self.env.reset()
