@@ -5,24 +5,25 @@ import { useUIStore } from '../store/uiStore';
 
 /* --- Helpers --- */
 function pressureColor(pressure: number | undefined, status?: string) {
-    // Status-aware coloring takes priority
-    if (status === 'SURGE_EPICENTER') return '#dc2626';  // Bright red
-    if (status === 'SURGE_CONE') return '#f97316';       // Orange gradient
-    if (status === 'AI_BOOSTING') return '#22d3ee';      // Bright cyan — AI increasing supply
-    if (status === 'AI_REROUTING') return '#818cf8';     // Indigo — AI rerouting flow
-    if (status === 'AI_PRIORITIZED') return '#06b6d4';   // Cyan — priority infrastructure
-    if (status === 'AI_BALANCED') return '#2dd4bf';      // Teal — balanced allocation
-    if (status === 'AI_STABILIZED') return '#10b981';    // Emerald — stable
-    if (status === 'ELEVATION_VULNERABLE') return '#f59e0b'; // Amber
-    if (status === 'CRITICAL_VULNERABLE') return '#ef4444';  // Red
-    if (status === 'SUPPLY_REDUCED') return '#eab308';    // Yellow
-    if (status === 'ISOLATED') return '#475569';          // Gray
+    // Abyssal Slate palette — muted organics
+    if (status === 'SURGE_EPICENTER') return '#ea580c';   // Terracotta
+    if (status === 'SURGE_CONE') return '#f59e0b';        // Amber
+    if (status === 'AI_BOOSTING') return '#14b8a6';       // Deep teal
+    if (status === 'AI_REROUTING') return '#818cf8';      // Indigo
+    if (status === 'AI_PRIORITIZED') return '#14b8a6';    // Teal
+    if (status === 'AI_BALANCED') return '#5eead4';       // Seafoam
+    if (status === 'AI_STABILIZED') return '#34d399';     // Emerald
+    if (status === 'ALTERNATE_SUPPLY') return '#818cf8';   // Indigo
+    if (status === 'ELEVATION_VULNERABLE') return '#fbbf24'; // Soft amber
+    if (status === 'CRITICAL_VULNERABLE') return '#ea580c';  // Terracotta
+    if (status === 'SUPPLY_REDUCED') return '#fbbf24';     // Amber
+    if (status === 'ISOLATED') return '#334155';           // Dark slate
     // Default pressure-based
-    if (pressure === null || pressure === undefined) return '#38bdf8';
-    if (pressure >= 18) return '#10b981';
-    if (pressure >= 12) return '#eab308';
-    if (pressure >= 6) return '#f97316';
-    return '#ef4444';
+    if (pressure === null || pressure === undefined) return '#5eead4';
+    if (pressure >= 18) return '#34d399';
+    if (pressure >= 12) return '#fbbf24';
+    if (pressure >= 6) return '#ea580c';
+    return '#c2410c';
 }
 
 const nodeMap = new Map();
@@ -62,7 +63,8 @@ export default function CanvasMap(props: TopologicalMapProps) {
     const {
         scenario, valvePct = 100, leakRate, activeTarget,
         selectedTargets = new Set(), onSelectTarget, onMultiSelect,
-        anomalyNode, nodeStates = {}, linkStates = {}, closedLinks = []
+        anomalyNode, nodeStates = {}, linkStates = {}, closedLinks = [],
+        flowDirections = {}
     } = props;
     
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -185,10 +187,13 @@ export default function CanvasMap(props: TopologicalMapProps) {
             if (!fromNode || !toNode) return;
 
             let drawFrom = fromNode, drawTo = toNode;
+            let isSwapped = false;
             if (toNode.is_source && !fromNode.is_source) {
                 drawFrom = toNode; drawTo = fromNode;
+                isSwapped = true;
             } else if (!fromNode.is_source && !toNode.is_source && fromNode.elevation < toNode.elevation) {
                 drawFrom = toNode; drawTo = fromNode;
+                isSwapped = true;
             }
 
             const isTargeted = activeTarget === link.id || selectedTargets.has(link.id);
@@ -200,78 +205,88 @@ export default function CanvasMap(props: TopologicalMapProps) {
             const isReroute = reroutePath.has(link.id);
             const isAiRestricted = scenario === 'AI_RECOVERY' && valvePct < 99 && !isIsolated;
 
-            let pipeColor = '#0ea5e9'; // cyan default
-            if (isAnomaly && scenario === 'RUPTURE') pipeColor = '#ef4444';
-            if (isIsolated) pipeColor = '#475569';
-            if (isAnomaly && scenario === 'SURGE') pipeColor = '#facc15';
-            if (isTargeted && !isAnomaly) pipeColor = '#a78bfa';
-            if (isReroute) pipeColor = '#f97316';
-            if (isAiRestricted && !isTargeted) pipeColor = '#22d3ee';
+            let pipeColor = '#5eead4'; // Seafoam default
+            if (isAnomaly && scenario === 'RUPTURE') pipeColor = '#ea580c';
+            if (isIsolated) pipeColor = '#334155';
+            if (isAnomaly && scenario === 'SURGE') pipeColor = '#fbbf24';
+            if (isTargeted && !isAnomaly) pipeColor = '#818cf8';
+            if (isReroute) pipeColor = '#fb923c';
+            if (isAiRestricted && !isTargeted) pipeColor = '#14b8a6';
 
-            // Base thick stroke
+            // Dark path base stroke
             ctx.beginPath();
             ctx.moveTo(drawFrom.x, drawFrom.y);
             ctx.lineTo(drawTo.x, drawTo.y);
-            ctx.lineWidth = isTargeted ? 12 : 10;
-            ctx.strokeStyle = isTargeted ? '#a78bfa' : '#1e293b';
+            ctx.lineWidth = isTargeted ? 10 : 8;
+            ctx.strokeStyle = isTargeted ? 'rgba(129, 140, 248, 0.25)' : 'rgba(30, 41, 59, 0.9)';
             ctx.lineCap = 'round';
             ctx.stroke();
 
-            // Inner flow
+            // Thin inner flow line
             ctx.beginPath();
             ctx.moveTo(drawFrom.x, drawFrom.y);
             ctx.lineTo(drawTo.x, drawTo.y);
-            ctx.lineWidth = 6;
-            ctx.strokeStyle = pipeColor;
+            ctx.lineWidth = isIsolated ? 2 : 3;
+            ctx.strokeStyle = isIsolated ? '#334155' : (isClosed ? '#c2410c' : pipeColor);
+            ctx.globalAlpha = isIsolated ? 0.4 : 0.7;
 
-            if (isIsolated) {
-                ctx.setLineDash([]);
-                ctx.stroke();
-            } else if (isClosed) {
-                ctx.strokeStyle = '#ef4444';
-                ctx.setLineDash([6, 8]);
-                ctx.stroke();
+            if (isClosed) {
+                ctx.setLineDash([4, 6]);
             } else {
-                ctx.setLineDash([20, 20]);
-                const speedMult = scenario === 'AI_RECOVERY' 
-                    ? Math.max(0.2, (valvePct / 100)) 
-                    : (leakRate > 1.0 || scenario === 'SURGE' ? 3 : 1);
-                ctx.lineDashOffset = -dashOffset.current * speedMult;
-                
-                if (isAiRestricted || isReroute) {
-                    ctx.shadowBlur = 10;
-                    ctx.shadowColor = pipeColor;
-                }
-                
-                ctx.stroke();
-                ctx.shadowBlur = 0; // reset
+                ctx.setLineDash([]);
             }
-            
-            ctx.setLineDash([]); // reset
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.globalAlpha = 1.0;
 
-            // Arrows (approximate in middle)
+            // Particle Flow — animated dots along pipe instead of triangles
             if (!isClosed && !isIsolated) {
-                const mx = (drawFrom.x + drawTo.x) / 2;
-                const my = (drawFrom.y + drawTo.y) / 2;
-                const angle = Math.atan2(drawTo.y - drawFrom.y, drawTo.x - drawFrom.x);
-                ctx.save();
-                ctx.translate(mx, my);
-                ctx.rotate(angle);
-                ctx.beginPath();
-                ctx.moveTo(-5, -5);
-                ctx.lineTo(5, 0);
-                ctx.lineTo(-5, 5);
-                ctx.fillStyle = pipeColor;
-                ctx.fill();
-                ctx.restore();
+                const flowDir = flowDirections?.[link.id];
+                const velocity = flowDir?.velocity || 0;
+                if (velocity >= 0.001) {
+                    const backendDir = flowDir?.direction || 'forward';
+                    const effectiveDir = isSwapped
+                        ? (backendDir === 'forward' ? 'reverse' : 'forward')
+                        : backendDir;
+
+                    const dx = drawTo.x - drawFrom.x;
+                    const dy = drawTo.y - drawFrom.y;
+                    const len = Math.sqrt(dx * dx + dy * dy);
+                    const ux = dx / len;
+                    const uy = dy / len;
+
+                    // Particle spacing and speed
+                    const spacing = 28;
+                    const numParticles = Math.max(1, Math.floor(len / spacing));
+                    const speed = 0.001 + velocity * 0.015;
+                    const phase = (dashOffset.current * speed) % 1.0;
+
+                    for (let i = 0; i < numParticles; i++) {
+                        let t = ((i / numParticles) + phase) % 1.0;
+                        if (effectiveDir === 'reverse') t = 1.0 - t;
+
+                        const px = drawFrom.x + dx * t;
+                        const py = drawFrom.y + dy * t;
+
+                        // Pulsing alpha for each particle
+                        const pulseAlpha = 0.5 + 0.5 * Math.sin((dashOffset.current * 0.08) + i * 1.2);
+
+                        ctx.beginPath();
+                        ctx.arc(px, py, 2.2, 0, Math.PI * 2);
+                        ctx.fillStyle = pipeColor;
+                        ctx.globalAlpha = pulseAlpha * 0.85;
+                        ctx.fill();
+                    }
+                    ctx.globalAlpha = 1.0;
+                }
             } else if (isClosed) {
                 const mx = (drawFrom.x + drawTo.x) / 2;
                 const my = (drawFrom.y + drawTo.y) / 2;
-                ctx.fillStyle = '#ef4444';
-                ctx.font = "bold 18px Arial";
+                ctx.fillStyle = '#c2410c';
+                ctx.font = "bold 14px Inter, sans-serif";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
-                ctx.fillText("X", mx, my);
+                ctx.fillText("×", mx, my);
             }
         });
 
@@ -287,9 +302,9 @@ export default function CanvasMap(props: TopologicalMapProps) {
             const nodeCrit = (live as any).criticality;
             
             const fillColor = isAnomaly && scenario === 'SURGE'
-                ? '#facc15' : node.is_source
-                    ? '#3b82f6' : node.is_leaf
-                        ? '#f59e0b' : pressureColor(p, nodeStatus);
+                ? '#fbbf24' : node.is_source
+                    ? '#14b8a6' : node.is_leaf
+                        ? '#fbbf24' : pressureColor(p, nodeStatus);
 
             // Pulsing halo for surge epicenter/cone and critical vulnerable nodes
             if (nodeStatus === 'SURGE_EPICENTER' || nodeStatus === 'SURGE_CONE' || nodeStatus === 'CRITICAL_VULNERABLE') {
@@ -298,7 +313,7 @@ export default function CanvasMap(props: TopologicalMapProps) {
                 const haloRadius = nodeStatus === 'SURGE_EPICENTER' ? 35 : 20;
                 ctx.beginPath();
                 ctx.arc(node.x, node.y, haloRadius, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(239,68,68,${haloAlpha})`;
+                ctx.fillStyle = `rgba(234,88,12,${haloAlpha})`;
                 ctx.fill();
             }
             // Criticality ring for critical infrastructure (crit=2)
@@ -464,7 +479,7 @@ export default function CanvasMap(props: TopologicalMapProps) {
                 mCtx.fillRect(vpLeft, vpTop, vpW, vpH);
             }
         }
-    }, [activeTarget, selectedTargets, nodeStates, linkStates, scenario, valvePct, leakRate, closedLinksSet, reroutePath, anomalyNode]);
+    }, [activeTarget, selectedTargets, nodeStates, linkStates, flowDirections, scenario, valvePct, leakRate, closedLinksSet, reroutePath, anomalyNode]);
 
     // Render loop ticker
     useEffect(() => {
@@ -707,13 +722,13 @@ export default function CanvasMap(props: TopologicalMapProps) {
 
             {/* ── Legend ── */}
             <div className="legend-hydro">
-                <div className="legend-item"><span className="legend-swatch" style={{ background: '#3b82f6' }}></span>Source</div>
-                <div className="legend-item"><span className="legend-swatch" style={{ background: '#f59e0b' }}></span>Leaf</div>
-                <div className="legend-item"><span className="legend-swatch" style={{ background: '#10b981' }}></span>Healthy</div>
-                <div className="legend-item"><span className="legend-swatch" style={{ background: '#ef4444' }}></span>Critical</div>
-                <div className="legend-item"><span className="legend-swatch" style={{ background: '#22d3ee' }}></span>AI Boost</div>
-                <div className="legend-item"><span className="legend-swatch" style={{ background: '#818cf8' }}></span>AI Reroute</div>
-                <div className="legend-item"><span className="legend-swatch" style={{ background: '#a78bfa' }}></span>Selected</div>
+                <div className="legend-item"><span className="legend-swatch" style={{ background: '#14b8a6' }}></span>Source</div>
+                <div className="legend-item"><span className="legend-swatch" style={{ background: '#fbbf24' }}></span>Leaf</div>
+                <div className="legend-item"><span className="legend-swatch" style={{ background: '#34d399' }}></span>Healthy</div>
+                <div className="legend-item"><span className="legend-swatch" style={{ background: '#ea580c' }}></span>Critical</div>
+                <div className="legend-item"><span className="legend-swatch" style={{ background: '#14b8a6' }}></span>AI Active</div>
+                <div className="legend-item"><span className="legend-swatch" style={{ background: '#818cf8' }}></span>Reroute</div>
+                <div className="legend-item"><span className="legend-swatch" style={{ background: '#818cf8' }}></span>Selected</div>
             </div>
 
             {/* ── Selection Help Bar ── */}

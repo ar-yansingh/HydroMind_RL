@@ -77,6 +77,7 @@ export interface TopologicalMapProps {
     nodeStates: Record<string, NodeState>;
     linkStates: Record<string, LinkState>;
     closedLinks: string[];
+    flowDirections?: Record<string, { direction: 'forward' | 'reverse'; velocity: number }>;
 }
 
 const TopologicalMap = ({

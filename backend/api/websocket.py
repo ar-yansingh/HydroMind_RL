@@ -4,7 +4,8 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from backend.models.state import DigitalTwinState
 from backend.simulation.physics import (
     _get_network_reachability, _generate_node_states, _generate_link_states,
-    _resolve_targets_to_nodes, compute_network_analytics, get_triage_sacrifice_zones
+    _resolve_targets_to_nodes, compute_network_analytics, get_triage_sacrifice_zones,
+    _compute_flow_directions, generate_diagnostic
 )
 from main import trigger_rupture, trigger_surge, trigger_shortage, reset_scenarios
 from backend.database.db import insert_telemetry_tick
@@ -164,19 +165,26 @@ async def websocket_endpoint(websocket: WebSocket):
 
                 if frame_count % 5 == 0:
                     anomaly_targets = getattr(get_twin_state(), 'active_targets', []) or []
-                    rch, dwn = _get_network_reachability(get_twin_state().closed_links, anomaly_targets, get_twin_state().phase)
+                    rch, dwn, alt, hop_dist = _get_network_reachability(get_twin_state().closed_links, anomaly_targets, get_twin_state().phase)
 
                     proposed_nodes = _generate_node_states(
-                        get_twin_state().phase, get_twin_state().step, rch, dwn, anomaly_targets, None, getattr(get_twin_state(), 'original_scenario', 'AMBIENT')
+                        get_twin_state().phase, get_twin_state().step, rch, dwn, anomaly_targets, None, getattr(get_twin_state(), 'original_scenario', 'AMBIENT'), alternate_supply=alt
                     )
                     payload["node_states"] = proposed_nodes
                     payload["link_states"] = _generate_link_states(
                         get_twin_state().phase, get_twin_state().step, get_twin_state().closed_links, rch, dwn, anomaly_targets, None, getattr(get_twin_state(), 'original_scenario', 'AMBIENT')
                     )
 
+                    # Compute flow directions strictly using BFS topology distance
+                    payload["flow_directions"] = _compute_flow_directions(payload["node_states"], payload["link_states"], hop_dist)
+
                     # Compute analytics
                     analytics = compute_network_analytics(payload["node_states"])
                     payload["network_analytics"] = analytics
+
+                    # Generate AI Diagnostic
+                    diag = generate_diagnostic(get_twin_state().phase, anomaly_targets, payload["node_states"], rch)
+                    payload["diagnostics"] = [diag] if diag else []
 
                 await websocket.send_text(json.dumps(payload))
                 await asyncio.sleep(0.1)

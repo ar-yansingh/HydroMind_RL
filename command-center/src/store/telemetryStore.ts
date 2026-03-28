@@ -14,6 +14,17 @@ export interface LinkState {
   velocity_ms: number;
 }
 
+export interface Diagnostic {
+  summary: string;
+  details: string;
+  metrics: Record<string, string | number>;
+}
+
+export interface FlowDirection {
+  direction: 'forward' | 'reverse';
+  velocity: number;
+}
+
 export interface ZoneHealth {
   total_nodes: number;
   healthy: number;
@@ -48,7 +59,9 @@ export interface TelemetryPayload {
   sacrificed_zones?: string[];
   node_states?: Record<string, NodeState>;
   link_states?: Record<string, LinkState>;
+  flow_directions?: Record<string, FlowDirection>;
   network_analytics?: NetworkAnalytics;
+  diagnostics?: Diagnostic[];
 }
 
 // --- WebSocket & State Store ---
@@ -102,7 +115,9 @@ export const useTelemetryStore = create<TelemetryStore>((set, get) => ({
         if (state.telemetry && !payload.node_states) {
           payload.node_states = state.telemetry.node_states;
           payload.link_states = state.telemetry.link_states;
+          payload.flow_directions = state.telemetry.flow_directions;
           payload.network_analytics = state.telemetry.network_analytics;
+          payload.diagnostics = state.telemetry.diagnostics;
         }
 
         // Phase 7: Update pressure history (circular buffer)
