@@ -18,16 +18,36 @@
 
 ## Repository Structure
 
-This repository contains **two independent dashboards**:
+```
+HydroMind_RL/
+├── server.py                  # FastAPI entry point (port 8000)
+├── main.py                    # Surrogate environment + DDPG training
+├── backend/
+│   ├── api/websocket.py       # WebSocket telemetry handler
+│   ├── models/state.py        # DigitalTwinState class
+│   ├── simulation/physics.py  # Physics engine (695 lines)
+│   ├── simulation/simulation.py # Event generator + grading
+│   ├── ai/inference.py        # GNN inference wrapper
+│   └── database/db.py         # SQLite time-series DB
+├── models/
+│   ├── ddpg_agent.py          # GNN Actor-Critic architecture
+│   └── checkpoints/           # Trained model weights
+├── envs/                      # WNTR Gymnasium environment
+├── utils/                     # Graph builder, replay buffer
+├── command-center/            # React frontend (Vite + TypeScript)
+├── data/networks/             # L-Town.inp (EPANET network)
+├── Dockerfile                 # Docker build for Azure deployment
+├── requirements.txt           # Python dependencies
+│
+├── HydroMind Dashboard/       # Bundled copy of the main project
+└── Presentation Dashboard/    # Standalone Next.js presentation site
+```
 
-| Folder | Purpose | Tech Stack |
-|--------|---------|-----------|
-| [`HydroMind Dashboard`](./HydroMind%20Dashboard) | **The main project** — Full-stack SCADA Command Center with real-time Digital Twin, AI agent, and operator controls | Python, FastAPI, PyTorch, React 19, Vite, Three.js, WebSockets |
-| [`Presentation Dashboard`](./Presentation%20Dashboard) | **Presentation only** — Showcases the problem space: global water loss statistics, financial impacts, and the case for AI intervention | Next.js, TailwindCSS, shadcn/ui |
+The **main project code lives at the repository root**. The `HydroMind Dashboard/` folder contains a bundled copy for reference, and `Presentation Dashboard/` is a separate Next.js app for presentations.
 
 ---
 
-## What is HydroMind Dashboard?
+## 🧠 HydroMind Dashboard
 
 The core project. A fully functional AI-powered water network management system with three operational modes:
 
@@ -42,7 +62,7 @@ A compound multi-scenario stress-testing engine. Randomly generates complex cris
 
 ### Key Technical Features
 - **Physics Engine**: WNTR/EPANET hydraulic solver with spatial pressure propagation, surge cones, and downstream cascade effects
-- **GNN-DDPG Agent**: Graph Neural Network processes network topology to compute optimal valve actuation strategies
+- **GNN-DDPG Agent**: Graph Neural Network (GCNConv) processes network topology to compute optimal valve actuation strategies
 - **Real-time Digital Twin**: Full 785-node network state streamed at 10 Hz via WebSocket
 - **Canvas Map**: High-performance HTML5 Canvas renderer with minimap, zoom/pan, sector selection, and anomaly highlighting
 - **City Map**: Leaflet-based geographic overlay of the network on real city tiles
@@ -50,7 +70,7 @@ A compound multi-scenario stress-testing engine. Randomly generates complex cris
 
 ---
 
-## What is Presentation Dashboard?
+## 🎨 Presentation Dashboard
 
 A standalone Next.js web application designed for **presentations and demos**. It does **not** connect to the AI backend or run any simulation. Instead, it provides:
 
@@ -67,10 +87,11 @@ A standalone Next.js web application designed for **presentations and demos**. I
 
 | Layer | Technologies |
 |-------|-------------|
-| **AI/ML** | PyTorch 2.0, PyTorch Geometric, DDPG, GNN (GraphSAGE) |
+| **AI/ML** | PyTorch 2.0, PyTorch Geometric, DDPG, GNN (GCNConv) |
 | **Simulation** | WNTR (Water Network Tool for Resilience), EPANET, Gymnasium |
-| **Backend API** | FastAPI, Uvicorn, WebSockets, Pydantic |
-| **Frontend** | React 19, Vite, TypeScript, Zustand, Three.js (React Three Fiber), Leaflet, Recharts |
+| **Backend API** | FastAPI, Uvicorn, WebSockets, SQLite |
+| **Frontend** | React 19, Vite, TypeScript, Zustand, Leaflet |
+| **Styling** | Tailwind CSS v4, Custom CSS ("Abyssal Slate" design system) |
 | **Deployment** | Docker, Azure Web Apps, GitHub Actions |
 
 ### Presentation Dashboard
@@ -90,12 +111,12 @@ A standalone Next.js web application designed for **presentations and demos**. I
 - **Node.js 18+** with npm
 - **Git**
 
-### HydroMind Dashboard Setup
+### Setup
 
 ```bash
 # Clone the repository
 git clone https://github.com/ar-yansingh/HydroMind_RL.git
-cd HydroMind_RL/HydroMind\ Dashboard
+cd HydroMind_RL
 ```
 
 #### 1. Backend (FastAPI + Physics Engine + AI Agent)
@@ -127,7 +148,7 @@ npm run dev
 # Dashboard opens at http://localhost:5173
 ```
 
-### Presentation Dashboard Setup
+### Presentation Dashboard Setup (Optional)
 
 ```bash
 # From the repo root
@@ -159,17 +180,17 @@ npm run dev
 
 ## Deployment
 
-The HydroMind Dashboard is optimized for **Azure Web Apps** via GitHub Actions.
+The project is optimized for **Azure Web Apps** via Docker.
 
 ```bash
 # Build the Docker container
-docker build -t hydromind-backend ./HydroMind\ Dashboard
+docker build -t hydromind .
 
 # Run locally
-docker run -p 8000:8000 hydromind-backend
+docker run -p 8000:8000 hydromind
 ```
 
-The pre-configured `Dockerfile` in the HydroMind Dashboard folder starts the FastAPI server on port `8000`. Pushing to `main` can trigger Azure container builds via the included GitHub Actions workflow.
+The `Dockerfile` at the repo root builds the React frontend, bundles it with the FastAPI backend, and starts the server on port `8000`. Pushing to `main` triggers Azure container builds via GitHub Actions.
 
 ---
 
