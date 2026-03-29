@@ -1,4 +1,4 @@
-# 🌊 HydroMind_RL
+# HydroMind_RL
 
 ### AI-Powered Smart Water Network Management System
 
@@ -8,7 +8,7 @@
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-ee4c2c.svg)](https://pytorch.org/)
 [![Azure](https://img.shields.io/badge/Deploy-Azure-blue.svg)](https://azure.microsoft.com/)
 
-> 🔗 **Live Demo**: [hydromind-inference-app.azurewebsites.net](https://hydromind-inference-app.azurewebsites.net/)
+>  **Live Demo**: [hydromind-inference-app.azurewebsites.net](https://hydromind-inference-app.azurewebsites.net/)
 
 **HydroMind_RL** is a real-time AI-driven SCADA Command Center and Digital Twin for urban water distribution networks. It uses a **Graph Neural Network (GNN)** trained via **Deep Deterministic Policy Gradient (DDPG)** reinforcement learning to autonomously detect anomalies — burst pipes, demand surges, supply shortages — and isolate affected zones by actuating smart valves in real time.
 
@@ -16,7 +16,7 @@
 
 ---
 
-## 📁 Repository Structure
+## Repository Structure
 
 This repository contains **two independent dashboards**:
 
@@ -27,7 +27,7 @@ This repository contains **two independent dashboards**:
 
 ---
 
-## 🧠 What is HydroMind Dashboard?
+## What is HydroMind Dashboard?
 
 The core project. A fully functional AI-powered water network management system with three operational modes:
 
@@ -50,7 +50,7 @@ A compound multi-scenario stress-testing engine. Randomly generates complex cris
 
 ---
 
-## 🎨 What is Presentation Dashboard?
+## What is Presentation Dashboard?
 
 A standalone Next.js web application designed for **presentations and demos**. It does **not** connect to the AI backend or run any simulation. Instead, it provides:
 
@@ -61,7 +61,7 @@ A standalone Next.js web application designed for **presentations and demos**. I
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### HydroMind Dashboard (Main Project)
 
@@ -83,7 +83,7 @@ A standalone Next.js web application designed for **presentations and demos**. I
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 - **Python 3.10+** with pip
@@ -139,7 +139,7 @@ npm run dev
 
 ---
 
-## 🎮 Usage Guide
+## Usage Guide
 
 ### Operator Mode
 1. Open `http://localhost:5173` → **Operator** tab
@@ -157,7 +157,7 @@ npm run dev
 
 ---
 
-## ☁️ Deployment
+## Deployment
 
 The HydroMind Dashboard is optimized for **Azure Web Apps** via GitHub Actions.
 
@@ -173,6 +173,6 @@ The pre-configured `Dockerfile` in the HydroMind Dashboard folder starts the Fas
 
 ---
 
-## 📄 License
+## License
 
 This project is developed for academic and research purposes.
